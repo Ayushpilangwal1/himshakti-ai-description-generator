@@ -13,10 +13,10 @@ export default function AboutPage() {
 
       <main className="flex-1 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-white">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
             🏔️ About HimShakti AI
           </h1>
-          <p className="mt-4 text-lg text-gray-400 leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
             HimShakti AI is built to empower small Himalayan food processing
             units — producers of millets, wild fruits, traditional pickles,
             and local snacks — by generating professional, marketplace-ready

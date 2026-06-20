@@ -1,61 +1,90 @@
 "use client";
 
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Input, Button, useToast } from "@/components/ui";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const { toast } = useToast();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Simple validation
+    const newErrors = {};
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Enter a valid email address";
+    if (!password.trim()) newErrors.password = "Password is required";
+    else if (password.length < 6) newErrors.password = "Password must be at least 6 characters";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      toast({
+        message: "Login functionality coming soon! Stay tuned. 🚀",
+        type: "info",
+        duration: 4000,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
-          <h1 className="text-3xl font-bold text-white text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center">
             🔐 Login
           </h1>
-          <p className="mt-2 text-center text-gray-400 text-sm">
+          <p className="mt-2 text-center text-gray-500 dark:text-gray-400 text-sm">
             Sign in to your HimShakti AI account
           </p>
 
-          <form onSubmit={(e) => e.preventDefault()} className="mt-8 space-y-5">
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                placeholder="you@example.com"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <Input
+              label="Email Address"
+              type="email"
+              id="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
+              }}
+              error={errors.email}
+            />
 
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                placeholder="••••••••"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
-              />
-            </div>
+            <Input
+              label="Password"
+              type="password"
+              id="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
+              }}
+              error={errors.password}
+            />
 
-            {/* Submit */}
-            <button
+            <Button
               type="submit"
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors text-sm"
+              variant="primary"
+              size="lg"
+              className="w-full"
             >
               Sign In
-            </button>
+            </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-500">
+          <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-500">
             Don&apos;t have an account?{" "}
-            <span className="text-green-400 cursor-pointer hover:underline">
+            <span className="text-brand-green cursor-pointer hover:underline">
               Sign up
             </span>
           </p>

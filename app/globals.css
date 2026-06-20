@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+/* Enable dark mode via .dark class on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Brand theme tokens */
+@theme {
+  --color-brand-green: #22C55E;
+  --color-brand-green-hover: #16A34A;
+  --color-brand-dark: #0B0F1A;
+  --color-brand-dark-card: #111827;
+  --color-brand-dark-surface: #1F2937;
+  --color-brand-navy: #1E293B;
+  --color-brand-navy-hover: #334155;
+}
+
+/* Smooth theme transition */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

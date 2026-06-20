@@ -31,13 +31,13 @@ export default function HomePage() {
       <Hero />
 
       {/* Products Section */}
-      <section className="bg-gray-900 py-16 px-4 sm:px-6 lg:px-8">
+      <section className="bg-gray-50 dark:bg-brand-dark py-16 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              Sample <span className="text-orange-400">Products</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
+              Sample <span className="text-orange-500 dark:text-orange-400">Products</span>
             </h2>
-            <p className="mt-3 text-gray-400 max-w-xl mx-auto">
+            <p className="mt-3 text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
               See how HimShakti AI can transform basic product info into
               compelling, marketplace-ready descriptions.
             </p>
