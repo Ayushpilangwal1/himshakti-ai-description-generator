@@ -4,57 +4,41 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Button, Loader } from "@/components/ui";
-
-const mockListings = {
-  1: {
-    id: 1,
-    name: "Himalayan Millet Snack",
-    description: "Discover the authentic taste of the mountains with our HimShakti Himalayan Millet Snack. Crafted from locally sourced barnyard millet, this crunchy, roasted treat is a powerhouse of nutrition. High in dietary fiber and naturally gluten-free, it's the perfect guilt-free snack for your busy lifestyle. Whether you're on a hike, at the office, or relaxing at home, enjoy a wholesome bite that supports both your health and local Himalayan farmers. No artificial preservatives, just pure, sun-kissed goodness in every crunch.",
-    category: "Himalayan Snacks",
-    marketplace: "Amazon India",
-    language: "English",
-    created: "June 18, 2026",
-    status: "Published",
-  },
-  2: {
-    id: 2,
-    name: "Wild Berry Juice",
-    description: "Quench your thirst with the vibrant, tangy flavor of HimShakti Wild Berry Juice. Handpicked from the pristine upper elevations of the Himalayas, our wild berries are bursting with antioxidants and natural vitamins. We use a gentle extraction process to ensure every bottle retains its full nutritional value. With zero added sugar and absolutely no artificial colors or preservatives, this refreshing beverage brings the untouched purity of mountain nature straight to your table. Serve chilled for a revitalizing morning boost.",
-    category: "Beverages",
-    marketplace: "Flipkart",
-    language: "English",
-    created: "June 19, 2026",
-    status: "Published",
-  },
-  3: {
-    id: 3,
-    name: "Traditional Pickle",
-    description: "Elevate your meals with the bold, spicy kick of HimShakti Traditional Pahadi Pickle. Following an age-old family recipe passed down through generations, we blend sun-dried mountain chillies with pure, cold-pressed mustard oil and a secret mix of aromatic Himalayan spices. Each jar is carefully fermented to perfection, delivering a rich, tangy flavor profile that pairs wonderfully with parathas, rice, or curries. Experience the true essence of traditional village cuisine with a pickle made the way our grandmothers intended.",
-    category: "Condiments",
-    marketplace: "Amazon India",
-    language: "English",
-    created: "June 20, 2026",
-    status: "Draft",
-  },
-};
+import { Button, Loader, useToast } from "@/components/ui";
 
 export default function ListingDetailPage({ params }) {
   const unwrappedParams = use(params);
   const [listing, setListing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Mock fetch based on ID
-    const timer = setTimeout(() => {
-      const data = mockListings[unwrappedParams.id];
-      if (data) {
-        setListing(data);
+    const fetchListing = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/listings/${unwrappedParams.id}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            setListing(null);
+          } else {
+            throw new Error("Failed to fetch listing");
+          }
+        } else {
+          const data = await response.json();
+          setListing(data);
+        }
+      } catch (error) {
+        console.error("Error fetching listing:", error);
+        toast({
+          message: "Could not load the listing.",
+          type: "error",
+        });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [unwrappedParams.id]);
+    };
+
+    fetchListing();
+  }, [unwrappedParams.id, toast]);
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -4,35 +4,58 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Button, Modal, Loader } from "@/components/ui";
-
-// Mock data
-const mockStats = [
-  { label: "Total Listings", value: "24" },
-  { label: "This Week", value: "6" },
-  { label: "Marketplaces", value: "3" },
-  { label: "Avg. Length", value: "142 words" },
-];
-
-const mockListings = [
-  { id: 1, name: "Himalayan Millet Snack", status: "Published" },
-  { id: 2, name: "Wild Berry Juice", status: "Published" },
-  { id: 3, name: "Traditional Pickle", status: "Draft" },
-  { id: 4, name: "Mountain Honey", status: "Pending" },
-  { id: 5, name: "Organic Walnuts", status: "Draft" },
-];
+import { Button, Modal, Loader, useToast } from "@/components/ui";
 
 export default function DashboardPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [listings, setListings] = useState([]);
+  const { toast } = useToast();
 
-  // Mock data loading
+  // Fetch real data from backend
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchListings = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/listings");
+        if (!response.ok) throw new Error("Failed to fetch listings");
+        const data = await response.json();
+        setListings(data);
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+        toast({
+          message: "Could not load listings from server.",
+          type: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, [toast]);
+
+  // Compute stats dynamically
+  const totalListings = listings.length;
+  const publishedCount = listings.filter((l) => l.status === "Published").length;
+  
+  // Calculate unique marketplaces safely
+  const uniqueMarketplaces = new Set(
+    listings
+      .map(l => l.marketplace)
+      .filter(Boolean)
+  ).size;
+
+  // Calculate average length safely
+  const avgLength = totalListings > 0 
+    ? Math.round(listings.reduce((acc, l) => acc + (l.description ? l.description.split(" ").length : 0), 0) / totalListings)
+    : 0;
+
+  const stats = [
+    { label: "Total Listings", value: totalListings.toString() },
+    { label: "Published", value: publishedCount.toString() },
+    { label: "Marketplaces", value: uniqueMarketplaces.toString() },
+    { label: "Avg. Length", value: `${avgLength} words` },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -70,7 +93,7 @@ export default function DashboardPage() {
                     <Loader type="skeleton" className="h-8 w-1/3" />
                   </div>
                 ))
-              : mockStats.map((stat, index) => (
+              : stats.map((stat, index) => (
                   <div key={index} className="bg-white dark:bg-brand-dark-card rounded-xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       {stat.label}
@@ -103,6 +126,10 @@ export default function DashboardPage() {
                     </div>
                   ))}
                 </div>
+              ) : listings.length === 0 ? (
+                <div className="p-10 text-center text-gray-500">
+                  No listings found. Generate one to get started!
+                </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
@@ -117,7 +144,7 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                      {mockListings.map((listing) => (
+                      {listings.map((listing) => (
                         <tr key={listing.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                           <td className="px-6 py-4">
                             <Link href={`/listing/${listing.id}`} className="text-sm font-medium text-gray-900 dark:text-white hover:text-brand-green dark:hover:text-brand-green transition-colors">

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Input, Textarea, Button, Loader, useToast } from "@/components/ui";
 
 export default function GeneratePage() {
+  const router = useRouter();
+
   // Form State
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
@@ -16,10 +19,11 @@ export default function GeneratePage() {
   // Generation State
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
+  const [createdListingId, setCreatedListingId] = useState(null);
   
   const { toast } = useToast();
 
-  const handleGenerate = (e) => {
+  const handleGenerate = async (e) => {
     e?.preventDefault();
     
     // Basic validation
@@ -30,30 +34,46 @@ export default function GeneratePage() {
 
     setIsGenerating(true);
     setGeneratedText(""); // Clear previous
+    setCreatedListingId(null);
 
-    // Mock API call delay (2s)
-    setTimeout(() => {
-      // Mock generated description based on input
-      const mockResult = `Introducing the ultimate ${productName} — your perfect choice for authentic Himalayan flavor. Carefully crafted using premium ${ingredients || "locally sourced ingredients"}, this exceptional product brings the purity of the mountains straight to your home. 
+    try {
+      const response = await fetch("http://localhost:5000/api/listings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productName,
+          category,
+          ingredients,
+          marketplace,
+          tone,
+        }),
+      });
 
-Tailored for ${marketplace || "the modern shopper"}, it offers a unique blend of taste and health benefits that you won't find anywhere else. Our traditional preparation methods ensure that every bite delivers a genuinely delightful experience. 
+      if (!response.ok) {
+        throw new Error("Failed to generate listing");
+      }
 
-Key Highlights:
-• 100% Authentic Himalayan Recipe
-• Made with natural, high-quality ingredients
-• Perfect for daily consumption or special occasions
-• Sustainably sourced and packaged
-
-Elevate your lifestyle today with a taste of the Himalayas!`;
-
-      setGeneratedText(mockResult);
-      setIsGenerating(false);
+      const data = await response.json();
+      
+      // The backend returns the new listing object including the generated description
+      setGeneratedText(data.description);
+      setCreatedListingId(data.id);
       
       toast({
         message: "Description generated successfully!",
         type: "success",
       });
-    }, 2000);
+    } catch (error) {
+      console.error("Generate error:", error);
+      toast({
+        message: "Failed to generate description. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleCopy = () => {
@@ -177,9 +197,11 @@ Elevate your lifestyle today with a taste of the Himalayas!`;
                       <Button variant="secondary" onClick={handleCopy}>
                         📋 Copy Text
                       </Button>
-                      <Button variant="outline" onClick={() => toast({ message: "Export feature coming soon!", type: "info" })}>
-                        📤 Export
-                      </Button>
+                      {createdListingId && (
+                        <Button variant="outline" onClick={() => router.push(`/listing/${createdListingId}`)}>
+                          👁️ View Listing
+                        </Button>
+                      )}
                       <div className="flex-1"></div>
                       <Button variant="outline" onClick={handleGenerate}>
                         🔄 Regenerate
